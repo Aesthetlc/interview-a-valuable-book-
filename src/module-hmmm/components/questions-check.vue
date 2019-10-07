@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <div class="app-container">试题审核</div>
+    <div class="app-container">试题1审核</div>
   </div>
 </template>
 
