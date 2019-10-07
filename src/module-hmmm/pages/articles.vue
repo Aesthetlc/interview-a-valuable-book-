@@ -23,7 +23,7 @@
         <el-table-column prop="address" label="阅读数"></el-table-column>
         <el-table-column prop="address" label="状态"></el-table-column>
         <el-table-column prop="address" label="录入人"></el-table-column>
-        <el-table-column prop="address" label="操作"></el-table-column>
+        <el-table-column prop="4444" label="操作"></el-table-column>
       </el-table>
 
     </el-card>
