@@ -1,19 +1,23 @@
 <template>
   <div class="dashboard-container">
     <el-card style="margin:20px">
-      <el-button>新增面试技巧</el-button>
+      <el-button @click="addArticlesMsg">新增面试技巧</el-button>
       <div class="search">
         <div class="left">
           <div class="searchWords">
             <span>关键词</span>
           </div>
           <div class="searchInput">
-            <el-input placeholder="请输入题目编号/题干"></el-input>
+            <el-input
+              @change="getSearchMsg(searchWords)"
+              v-model="searchWords"
+              placeholder="请输入题目编号/题干"
+            ></el-input>
           </div>
         </div>
         <div class="right">
-          <el-button>清除</el-button>
-          <el-button type="primary">搜索</el-button>
+          <el-button @click="clearKeywords">清除</el-button>
+          <el-button @click="getSearchMsg(searchWords)" type="primary">搜索</el-button>
         </div>
       </div>
 
@@ -67,37 +71,56 @@
               :current-page="page.currentPage"
               :total="page.total"
               :page-size="page.pageSize"
-              :page-sizes="[1,2,3,4]"
+              :page-sizes="[3,6,9,10]"
               layout="sizes, prev, pager, next, jumper"
             ></el-pagination>
           </div>
         </div>
         <!-- end -->
       </el-row>
+
+      <!-- 新增标签弹层 -->
+      <Dialog ref="editUser"></Dialog>
     </el-card>
   </div>
 </template>
 
 <script>
 import { list } from '@/api/hmmm/articles'
+import Dialog from './../components/articles-add'
 export default {
   name: 'ArticlesList',
+  components: {
+    Dialog
+  },
   data() {
     return {
       ArticlesList: [], // 获取面试技巧数据
       listLoading: true,
       page: {
-       currentPage: 1,
-       total: 0,
-       pageSize: 1 
-      }
+        currentPage: 1,
+        total: 0,
+        pageSize: 6
+      },
+      searchWords: '' // 搜索关键词
+    }
+  },
+  watch: {
+      searchWords(newValue) {
+      this.searchWords = newValue
+      this.getArticlesSkill()
     }
   },
   methods: {
+    // 新增面试信息
+    addArticlesMsg() {
+      this.$refs.editUser.dialogFormV()
+    },
     async getArticlesSkill() {
       let data = {
         page: this.page.currentPage,
-        pagesize: this.page.pageSize
+        pagesize: this.page.pageSize,
+        keyword: this.searchWords
       }
       this.listLoading = true
       let result = await list(data)
@@ -117,6 +140,18 @@ export default {
     // 进入某一页
     handleCurrentChange(newPage) {
       this.page.currentPage = newPage
+      this.getArticlesSkill()
+    },
+
+    // 搜索关键词
+    getSearchMsg(keyword) {
+      this.searchWords = keyword
+      this.getArticlesSkill()
+    },
+
+    // 重置
+    clearKeywords() {
+      this.searchWords = ''
       this.getArticlesSkill()
     }
   },
