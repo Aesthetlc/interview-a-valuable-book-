@@ -28,11 +28,7 @@
         style="width: 100%"
         class="table"
       >
-        <el-table-column align="center" label="序号">
-          <template slot-scope="scope">
-            <span>{{scope.row.id}}</span>
-          </template>
-        </el-table-column>
+        <el-table-column label="序号" align="center" type="index"></el-table-column>
         <el-table-column align="center" label="标题">
           <template slot-scope="scope">
             <span>{{scope.row.title}}</span>
@@ -43,11 +39,7 @@
             <span>{{scope.row.reads}}</span>
           </template>
         </el-table-column>
-        <el-table-column align="center" label="状态">
-          <template slot-scope="scope">
-            <span>{{scope.row.state | changeStatus}}</span>
-          </template>
-        </el-table-column>
+        <el-table-column label="状态" align="center" prop="state" :formatter="statusFMT"></el-table-column>
         <el-table-column align="center" label="录入人">
           <template slot-scope="scope">
             <span>{{scope.row.creator}}</span>
@@ -89,6 +81,7 @@
 
 <script>
 import { list, remove } from '@/api/hmmm/articles'
+import result from '@/api/base/baseApi' // 常量数据
 import Dialog from './../components/articles-add'
 export default {
   name: 'ArticlesList',
@@ -114,6 +107,10 @@ export default {
     }
   },
   methods: {
+    // 状态过滤
+    statusFMT(row, column, cellValue) {
+      return result.status[cellValue - 1]['value']
+    },
     // 删除面试信息
     delArticlesMsg(obj) {
       this.$confirm('您要删除此条信息么？', '提示', {
@@ -174,16 +171,6 @@ export default {
   },
   created() {
     this.getArticlesSkill()
-  },
-  filters: {
-    changeStatus(status) {
-      switch (status) {
-        case 1:
-          return '启用'
-        case 2:
-          return '禁用'
-      }
-    }
   }
 }
 </script>
