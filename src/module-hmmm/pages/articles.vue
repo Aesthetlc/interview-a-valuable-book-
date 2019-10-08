@@ -20,7 +20,6 @@
           <el-button @click="getSearchMsg(searchWords)" type="primary">搜索</el-button>
         </div>
       </div>
-
       <el-table
         v-loading="listLoading"
         :data="ArticlesList"
@@ -50,7 +49,10 @@
             <el-link type="primary">预览</el-link>
             <el-link type="primary">修改</el-link>
             <el-link type="primary" @click="delArticlesMsg(obj.row)">删除</el-link>
-            <el-link type="primary">禁用</el-link>
+            <el-link
+              type="primary"
+              @click="forbiddenArticlesMsg(obj.row)"
+            >{{obj.row.state?"禁用":"启用"}}</el-link>
           </template>
         </el-table-column>
       </el-table>
@@ -80,8 +82,8 @@
 </template>
 
 <script>
-import { list, remove } from '@/api/hmmm/articles'
-import result from '@/api/base/baseApi' // 常量数据
+import { list, remove, state } from '@/api/hmmm/articles'
+import { status } from '@/api/hmmm/constants' // 常量数据
 import Dialog from './../components/articles-add'
 export default {
   name: 'ArticlesList',
@@ -107,9 +109,35 @@ export default {
     }
   },
   methods: {
+    // 禁用状态
+    forbiddenArticlesMsg(obj) {
+      let condition = obj.state ? '禁用' : '启用'
+      this.$confirm(`您要${condition}此条信息么？`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        if (Number(obj.state) === 1) {
+          obj.state = 0
+        } else {
+          obj.state = 1
+        }
+        state(obj)
+        this.$message({
+          type: 'success',
+          message: `${condition}成功!`
+        })
+        this.getArticlesSkill()
+      })
+    },
     // 状态过滤
     statusFMT(row, column, cellValue) {
-      return result.status[cellValue - 1]['value']
+      let result = status.filter(item => {
+        if (item.value === cellValue) {
+          return item.label
+        }
+      })
+      return result[0]['label']
     },
     // 删除面试信息
     delArticlesMsg(obj) {
@@ -118,7 +146,7 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        remove(obj)
+        state(obj)
         this.$message({
           type: 'success',
           message: '删除成功!'
