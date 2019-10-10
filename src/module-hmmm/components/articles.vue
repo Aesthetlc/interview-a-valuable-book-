@@ -44,6 +44,10 @@ export default {
       type: Object,
       required: true
     }
+    // aaa: {
+    //    type: Object,
+    //   required: true
+    // }
   },
   data() {
     return {
@@ -70,8 +74,9 @@ export default {
             await add(this.formBase.data)
             this.$message({ message: '添加成功', type: 'success' })
           }
+          this.$emit('shuaxin')
           this.dialogFormVisible = false
-          this.$router.push('/articles/list')
+         
         }
       })
     },
@@ -80,7 +85,9 @@ export default {
       this.dialogFormVisible = false
     }
   },
-  created() {}
+  created() {
+    
+  }
 }
 </script>
 
