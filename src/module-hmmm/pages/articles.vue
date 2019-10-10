@@ -76,7 +76,7 @@
       </el-row>
 
       <!-- 新增标签弹层 -->
-      <Dialog ref="editUser" :titleInfo="titleInfo" :formBase="formData"></Dialog>
+      <Dialog ref="editUser" @shuaxin="getArticlesSkill()" :titleInfo="titleInfo" :formBase="formData"></Dialog>
     </el-card>
   </div>
 </template>
@@ -112,6 +112,9 @@ export default {
           videoURL: '',
           visits: ''
         }
+      },
+      aaa: {
+        
       }
     }
   },
@@ -223,6 +226,7 @@ export default {
     }
   },
   created() {
+    this.aaa = this.getArticlesSkill()
     this.getArticlesSkill()
   }
 }

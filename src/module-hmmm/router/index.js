@@ -1,5 +1,11 @@
 import Layout from '@/module-dashboard/pages/layout'
+import Router from 'vue-router'
 const _import = require('@/router/import_' + process.env.NODE_ENV)
+
+// const originalPush = Router.prototype.push
+// Router.prototype.push = function push (location) {
+//   return originalPush.call(this, location).catch(err => err)
+// }
 
 export default [
   {
