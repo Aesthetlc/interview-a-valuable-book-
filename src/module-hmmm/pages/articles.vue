@@ -76,7 +76,7 @@
       </el-row>
 
       <!-- 新增标签弹层 -->
-      <Dialog ref="editUser" @refresh="getArticlesSkill()" :titleInfo="titleInfo" :formBase="formData"></Dialog>
+      <child-dialog ref="editArticles" @refresh="getArticlesSkill()" :titleInfo="titleInfo" :formBase="formData"></child-dialog>
     </el-card>
   </div>
 </template>
@@ -84,11 +84,11 @@
 <script>
 import { list, remove, state, detail } from '@/api/hmmm/articles'
 import { status } from '@/api/hmmm/constants' // 常量数据
-import Dialog from './../components/articles-add-update'
+import dialog from '@/module-hmmm/components/articles-add-update'
 export default {
   name: 'ArticlesList',
   components: {
-    Dialog
+    'child-dialog': dialog
   },
   data() {
     return {
@@ -127,7 +127,7 @@ export default {
   methods: {
     // 新增面试信息
     handleChange(val) {
-      this.$refs.editUser.dialogFormV()
+      this.$refs.editArticles.dialogFormV()
       if (val === 'add') {
         this.titleInfo.text = '新增'
       } else {
