@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard-container">
     <el-card style="margin:20px">
-      <el-button @click="addArticlesMsg">新增面试技巧</el-button>
+      <el-button @click="handleChange('add')">新增面试技巧</el-button>
       <div class="search">
         <div class="left">
           <div class="searchWords">
@@ -20,7 +20,6 @@
           <el-button @click="getSearchMsg(searchWords)" type="primary">搜索</el-button>
         </div>
       </div>
-
       <el-table
         v-loading="listLoading"
         :data="ArticlesList"
@@ -48,9 +47,12 @@
         <el-table-column label="操作">
           <template slot-scope="obj">
             <el-link type="primary">预览</el-link>
-            <el-link type="primary">修改</el-link>
+            <el-link type="primary" @click="handleChange(obj.row)">修改</el-link>
             <el-link type="primary" @click="delArticlesMsg(obj.row)">删除</el-link>
-            <el-link type="primary">禁用</el-link>
+            <el-link
+              type="primary"
+              @click="forbiddenArticlesMsg(obj.row)"
+            >{{obj.row.state?"禁用":"启用"}}</el-link>
           </template>
         </el-table-column>
       </el-table>
@@ -74,15 +76,15 @@
       </el-row>
 
       <!-- 新增标签弹层 -->
-      <Dialog ref="editUser"></Dialog>
+      <Dialog ref="editUser" :titleInfo="titleInfo" :formBase="formData"></Dialog>
     </el-card>
   </div>
 </template>
 
 <script>
-import { list, remove } from '@/api/hmmm/articles'
-import result from '@/api/base/baseApi' // 常量数据
-import Dialog from './../components/articles-add'
+import { list, remove, state, detail } from '@/api/hmmm/articles'
+import { status } from '@/api/hmmm/constants' // 常量数据
+import Dialog from './../components/articles'
 export default {
   name: 'ArticlesList',
   components: {
@@ -97,7 +99,20 @@ export default {
         total: 0,
         pageSize: 6
       },
-      searchWords: '' // 搜索关键词
+      searchWords: '', // 搜索关键词
+      titleInfo: {
+        text: '' // 新增、编辑
+      },
+      formData: {
+        data: {
+          title: '',
+          articleBody: '',
+          creatorID: '',
+          state: '',
+          videoURL: '',
+          visits: ''
+        }
+      }
     }
   },
   watch: {
@@ -107,9 +122,51 @@ export default {
     }
   },
   methods: {
+    // 新增面试信息
+    handleChange(val) {
+      this.$refs.editUser.dialogFormV()
+      if (val === 'add') {
+        this.titleInfo.text = '新增'
+      } else {
+        this.titleInfo.text = '编辑'
+        this.hanldeEditForm(val)
+      }
+    },
+    // 获取编辑的信息 传递给弹窗
+    async hanldeEditForm(val) {
+      const res = await detail(val)
+      // 获取详情 给formData
+      this.formData = res
+    },
+    // 禁用状态
+    forbiddenArticlesMsg(obj) {
+      let condition = obj.state ? '禁用' : '启用'
+      this.$confirm(`您要${condition}此条信息么？`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        if (Number(obj.state) === 1) {
+          obj.state = 0
+        } else {
+          obj.state = 1
+        }
+        state(obj)
+        this.$message({
+          type: 'success',
+          message: `${condition}成功!`
+        })
+        this.getArticlesSkill()
+      })
+    },
     // 状态过滤
     statusFMT(row, column, cellValue) {
-      return result.status[cellValue - 1]['value']
+      let result = status.filter(item => {
+        if (item.value === cellValue) {
+          return item.label
+        }
+      })
+      return result[0]['label']
     },
     // 删除面试信息
     delArticlesMsg(obj) {
@@ -118,17 +175,13 @@ export default {
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
-        remove(obj)
+        state(obj)
         this.$message({
           type: 'success',
           message: '删除成功!'
         })
         this.getArticlesSkill()
       })
-    },
-    // 新增面试信息
-    addArticlesMsg() {
-      this.$refs.editUser.dialogFormV()
     },
     async getArticlesSkill() {
       let data = {
