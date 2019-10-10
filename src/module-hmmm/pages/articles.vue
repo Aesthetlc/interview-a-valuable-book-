@@ -76,7 +76,7 @@
       </el-row>
 
       <!-- 新增标签弹层 -->
-      <Dialog ref="editUser" @shuaxin="getArticlesSkill()" :titleInfo="titleInfo" :formBase="formData"></Dialog>
+      <Dialog ref="editUser" @refresh="getArticlesSkill()" :titleInfo="titleInfo" :formBase="formData"></Dialog>
     </el-card>
   </div>
 </template>
@@ -84,7 +84,7 @@
 <script>
 import { list, remove, state, detail } from '@/api/hmmm/articles'
 import { status } from '@/api/hmmm/constants' // 常量数据
-import Dialog from './../components/articles'
+import Dialog from './../components/articles-add-update'
 export default {
   name: 'ArticlesList',
   components: {

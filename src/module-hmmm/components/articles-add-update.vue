@@ -74,7 +74,7 @@ export default {
             await add(this.formBase.data)
             this.$message({ message: '添加成功', type: 'success' })
           }
-          this.$emit('shuaxin')
+          this.$emit('refresh')
           this.dialogFormVisible = false
          
         }
