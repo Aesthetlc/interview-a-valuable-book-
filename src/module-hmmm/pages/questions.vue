@@ -3,11 +3,11 @@
     <el-card style="margin:20px">
       <el-button>新增试题</el-button>
       <el-button>批量导入</el-button>
-      <el-form>
+      <el-form label-width="70px">
         <el-row>
           <el-col :span="6">
             <el-form-item label="学科">
-              <el-select placeholder="请选择" v-model="formData.subjectID">
+              <el-select placeholder="请选择" v-model="formData.subjectID" style="width:245px">
                 <el-option
                   v-for="item in subjectList"
                   :key="item.value"
@@ -61,7 +61,7 @@
               <el-select
                 style="width:120px"
                 placeholder="请选择"
-                @change="getCitysList(formData.province)"
+                @change="getCitysList"
                 v-model="formData.province"
               >
                 <el-option v-for="item in provinces()" :key="item" :label="item" :value="item"></el-option>
@@ -74,19 +74,19 @@
 
           <el-col :span="6">
             <el-form-item label="关键词">
-              <el-input style="width:250px" v-model="formData.keyword"></el-input>
+              <el-input placeholder="请输入" style="width:220px" v-model="formData.keyword"></el-input>
             </el-form-item>
           </el-col>
 
           <el-col :span="6">
             <el-form-item label="题目备注">
-              <el-input style="width:250px" v-model="formData.remarks"></el-input>
+              <el-input placeholder="请输入" style="width:220px" v-model="formData.remarks"></el-input>
             </el-form-item>
           </el-col>
 
           <el-col :span="6">
             <el-form-item label="企业简称">
-              <el-input style="width:250px" v-model="formData.shortName"></el-input>
+              <el-input placeholder="请输入" style="width:220px" v-model="formData.shortName"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -94,7 +94,7 @@
         <el-row>
           <el-col :span="6">
             <el-form-item label="方向">
-              <el-select v-model="formData.direction">
+              <el-select style="width:245px" v-model="formData.direction">
                 <el-option v-for="item in directionList" :key="item" :label="item" :value="item"></el-option>
               </el-select>
             </el-form-item>
@@ -124,20 +124,20 @@
             </el-form-item>
           </el-col>
           <el-col :span="6">
-            <el-button type="primary">搜索</el-button>
+            <el-button type="primary" @click="getQuestionList">搜索</el-button>
             <el-button>重置</el-button>
           </el-col>
         </el-row>
       </el-form>
 
-      <el-table :data="questionList" >
+      <el-table :data="questionList">
         <el-table-column label="序号" type="index"></el-table-column>
         <el-table-column label="试题编号" prop="number"></el-table-column>
         <el-table-column label="学科" prop="subject"></el-table-column>
-        <el-table-column label="题型" prop="questionType"></el-table-column>
+        <el-table-column label="题型" prop="questionType" :formatter="questionTypeChange"></el-table-column>
         <el-table-column label="题干" prop="question"></el-table-column>
-        <el-table-column label="录入时间"  prop="addDate"></el-table-column>
-        <el-table-column label="难度" prop="difficulty"></el-table-column>
+        <el-table-column label="录入时间" prop="addDate"></el-table-column>
+        <el-table-column label="难度" prop="difficulty" :formatter="difficultyChange"></el-table-column>
         <el-table-column label="录入人" prop="creator"></el-table-column>
         <el-table-column label="操作">
           <el-link>预览</el-link>
@@ -146,6 +146,17 @@
           <el-link>加入精选</el-link>
         </el-table-column>
       </el-table>
+
+      <!-- 分页显示 -->
+      <el-pagination
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+        :current-page="formData.page"
+        :page-sizes="[2, 4, 6, 8]"
+        :page-size="formData.pagesize"
+        layout="total, sizes, prev, pager, next, jumper"
+        :total="formData.counts"
+      ></el-pagination>
     </el-card>
   </div>
 </template>
@@ -187,11 +198,40 @@ export default {
         shortName: '', // 企业简称
         direction: '', // 方向
         creatorID: '', // 录入人
-        catalogID: '' // 目录
+        catalogID: '', // 目录
+        pagesize: 2, // 页尺寸
+        page: 1, // 当前页数
+        counts: 0 // 总记录数
       }
     }
   },
   methods: {
+    handleSizeChange(sizePage) {
+      this.formData.pagesize = sizePage
+      this.getQuestionList()
+    },
+    handleCurrentChange(currentPage) {
+      this.formData.page = currentPage
+      this.getQuestionList()
+    },
+    // 题型转换
+    questionTypeChange(row, column, cellValue, index) {
+      let result = questionTypeList.filter(item => {
+        if (Number(item.value) === Number(cellValue)) {
+          return item
+        }
+      })
+      return result[0].label
+    },
+    // 难度转换
+    difficultyChange(row, column, cellValue, index) {
+      let result = difficultyList.filter(item => {
+        if (Number(item.value) === Number(cellValue)) {
+          return item
+        }
+      })
+      return result[0].label
+    },
     // 获取学科的方法
     async getSubjectList() {
       let result = await simple()
@@ -205,8 +245,8 @@ export default {
     // 获取城市的方法
     provinces,
     // 获取区域的方法
-    getCitysList(name) {
-      this.citysList = citys(name)
+    async getCitysList(name) {
+      this.citysList = await citys(name)
     },
     // 获取录入人的方法
     async getCreatorIDList() {
@@ -220,8 +260,9 @@ export default {
     },
     // 获取数据 供table显示
     async getQuestionList() {
-      let result = await list()
+      let result = await list(this.formData)
       this.questionList = result.data.items
+      this.formData.counts = result.data.counts
     }
   },
   created() {
@@ -230,6 +271,11 @@ export default {
     this.getCreatorIDList()
     this.getCatalogIDList()
     this.getQuestionList()
+  },
+  watch: {
+    'formData.keyword'(newValue) {
+      this.getQuestionList()
+    }
   }
 }
 </script>

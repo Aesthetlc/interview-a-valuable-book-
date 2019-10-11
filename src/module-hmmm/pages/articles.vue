@@ -9,9 +9,9 @@
           </div>
           <div class="searchInput">
             <el-input
-              @change="getSearchMsg(searchWords)"
               v-model="searchWords"
               placeholder="请输入题目编号/题干"
+              @input="getArticlesSkill"
             ></el-input>
           </div>
         </div>
@@ -112,16 +112,7 @@ export default {
           videoURL: '',
           visits: ''
         }
-      },
-      aaa: {
-        
       }
-    }
-  },
-  watch: {
-    searchWords(newValue) {
-      this.searchWords = newValue
-      this.getArticlesSkill()
     }
   },
   methods: {
@@ -187,12 +178,12 @@ export default {
       })
     },
     async getArticlesSkill() {
+      this.listLoading = true
       let data = {
         page: this.page.currentPage,
         pagesize: this.page.pageSize,
         keyword: this.searchWords
       }
-      this.listLoading = true
       let result = await list(data)
       this.ArticlesList = result.data.items
       // 获取总条数
